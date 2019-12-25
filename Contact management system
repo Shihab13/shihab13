@@ -1,0 +1,275 @@
+#include<stdio.h>
+#include<conio.h>
+#include<string.h>
+#include<stdlib.h>
+
+
+#define username"daffodil"
+#define userpass"12345"
+void login()
+{
+	int a=0,i=0;
+    char uname[10],c=' ';
+    char pword[10],code[10];
+
+    do
+  {
+    printf("\n    LOGIN FORM :   ");
+    printf(" \n\n\t\t\tENTER USERNAME:-");
+	scanf("%s", &uname);
+	printf(" \n\n\t\t\tENTER PASSWORD:-");
+	while(i<10)
+	{
+	    pword[i]=getch();
+	    c=pword[i];
+	    if(c==13) break;
+	    else printf("*");
+	    i++;
+	}
+	pword[i]='\0';
+	i=0;
+		if(strcmp(uname, username)==0 && strcmp(pword, userpass)==0)
+	{
+	printf("  \n\n\n       WELCOME TO CONTACT MANAGEMENT SYSTEM !!!! LOGIN IS SUCCESSFUL");
+	printf("\n\n\n\t\t\t\tPress any key to continue...");
+	getch();//holds the screen
+	break;
+	}
+	else
+	{
+		printf("\n\n\t\tSORRY !!!! LOGIN IS UNSUCESSFUL...\n\t\tUSERNAME or PASSWORD is wrong");
+		a++;
+		getch();//holds the screen
+	}
+  }
+	while(a<=2);
+	if (a>2)
+	{
+		printf("\nSorry you have entered the wrong USERNAME and PASSWORD for three times!!!");
+		getch();
+        exit(1);
+		}
+		system("cls");
+}
+
+struct contact
+{
+    long ph;
+    char name[20],add[20],email[30];
+
+} list;
+char query[20],name[20];
+FILE *fp, *ft;
+int i,n,choice,l,found;
+
+int main()
+{
+   login();
+
+main:
+    system("cls");    //Main menu
+    printf("\n\t\t************ Contact Management System ************\t\t");
+    printf("\n\n\n\t\t\tMAIN MENU\n\t\t************************\n\t\t<1> Add new Contact\n\t\t<2> List all Contacts\n\t\t<3> Search for contact\n\t\t<4> Edit a Contact\n\t\t<5> Delete a Contact\n\t\t<0> Exit\n\t\t************************\n\t\t");
+    for(i=0;i<50;i++)
+		printf("-");
+
+	printf("\n\n\t\tEnter Your Choice:");
+    scanf("%d",&choice);
+
+    switch (choice)
+    {
+       //for exit
+    case 0:
+        printf("\n\n\t\tAre you sure you want to exit?");
+        break;
+
+        // Add new contacts
+    case 1:
+        system("cls");
+        fp=fopen("contact.txt","a");
+
+        for (;;)
+        {
+            fflush(stdin);
+            printf("\nFullName :");
+            scanf("%[^\n]",&list.name);
+
+            if(stricmp(list.name,"")==0 || stricmp(list.name," ")==0)
+                break;
+
+            fflush(stdin);
+            printf("Phone:");
+            scanf("%ld",&list.ph);
+
+            fflush(stdin);
+            printf("address:");
+            scanf("%[^\n]",&list.add);
+
+            fflush(stdin);
+            printf("email address:");
+            gets(list.email);
+
+            printf("\n");
+            fwrite(&list,sizeof(list),1,fp);
+        }
+        fclose(fp);
+        break;
+
+       //list all contacts
+    case 2:
+
+        system("cls");
+        printf("\n\t\t\n\t\t\tLIST OF CONTACTS\n\t\t\n\n\n=================================================================\n\n");
+        for(i=97; i<=122; i=i+1)
+        {
+            fp=fopen("contact.txt","r");
+            fflush(stdin);
+            found=0;
+
+
+            while(fread(&list,sizeof(list),1,fp)==1)
+{
+
+                if(list.name[0]==i || list.name[0]==i-32)
+                {
+                    printf("\nName\t: %s\nPhone\t: %ld\nAddress\t: %s\nEmail\t:%s \n",list.name,
+                           list.ph,list.add,list.email);
+                    found++;
+                }
+            }
+
+
+
+            if(found!=0)
+            {
+                printf("=========================================================== [%c]-(%d)\n\n",i-32,found);
+                getch();
+            }
+            fclose(fp);
+        }
+        break;
+
+        // search contacts
+    case 3:
+        system("cls");
+        do
+        {
+            found=0;
+            printf("\n\n\t\t CONTACT SEARCH\n\t===========================\n\t\t Name of contact to search: ");
+            fflush(stdin);
+
+            scanf("%[^\n]",&query);
+            l=strlen(query);
+            fp=fopen("contact.txt","r");
+            system("cls");
+
+            printf("\n\n\tSearch result for '%s' \n===================================================\n",query);
+            while(fread(&list,sizeof(list),1,fp)==1)
+            {
+                for(i=0; i<=l; i++)
+                    name[i]=list.name[i];
+                name[l]='\0';
+
+                if(strcmp(name,query)==0)
+                {
+                    printf("\n\t\tName\t: %s\n\t\tPhone\t: %ld\n\t\tAddress\t: %s\n\t\tEmail\t: %s\n",list.name,list.ph,list.add,list.email);
+                    found++;
+
+                    if (found%4==0)
+                    {
+                        printf("\tPress any key to continue...");
+                        getch();
+                    }
+                }
+            }
+            if(found==0)
+                printf("\n\t\t\tNo match found!");
+            else
+                printf("\n\t\t%d match(s) found!",found);
+            fclose(fp);
+            printf("\n \t\tTry again?\n\n\t[1] Yes\t\t[0] No\n\t");
+            scanf("%d",&choice);
+        }
+        while(choice==1);
+        break;
+
+        //edit contacts
+    case 4:
+        system("cls");
+        fp=fopen("contact.txt","r");
+        ft=fopen("temp.txt","w");
+        fflush(stdin);
+
+        printf("\t\tEdit contact\n===============================\n\n\t\t\tEnter the name of contact to edit:");
+        scanf("%[^\n]",name);
+
+        while(fread(&list,sizeof(list),1,fp)==1)
+        {
+            if(strcmp(name,list.name)!=0)
+                fwrite(&list,sizeof(list),1,ft);
+        }
+        fflush(stdin);
+        printf("\n\n\t\tEditing '%s'\n\n",name);
+        printf("\t\tName(Use identical):");
+        scanf("%[^\n]",&list.name);
+
+        fflush(stdin);
+        printf("\t\tPhone:");
+        scanf("%ld",&list.ph);
+
+        fflush(stdin);
+        printf("\t\taddress:");
+        scanf("%[^\n]",&list.add);
+
+        fflush(stdin);
+        printf("\t\temail address:");
+        gets(list.email);
+        printf("\n");
+        fwrite(&list,sizeof(list),1,ft);
+
+        fclose(fp);
+        fclose(ft);
+
+        remove("contact.txt");
+        rename("temp.txt","contact.txt");
+        break;
+
+        //delete contacts
+    case 5:
+        system("cls");
+        fflush(stdin);
+        printf("\n\n\t\t\tDELETE A CONTACT\n\t==========================\n\t\t\tEnter the name of contact to delete:");
+        scanf("%[^\n]",&name);
+        fp=fopen("contact.txt","r");
+        ft=fopen("temp.txt","w");
+        while(fread(&list,sizeof(list),1,fp)!=0)
+            if (strcmp(name,list.name)!=0)
+                fwrite(&list,sizeof(list),1,ft);
+        fclose(fp);
+        fclose(ft);
+
+        remove("contact.txt");
+        rename("temp.txt","contact.txt");
+        break;
+
+    default:
+        printf("INVALAD..please enter RIGHT choice");
+        getch();
+        goto main;
+    }
+    printf("\n\n\n\t\tEnter the Choice:\n\n\t[1] Main Menu\t\t[0] Exit\n");
+    scanf("%d",&choice);
+
+    switch (choice)
+    {
+    case 1:
+        goto main;
+    case 0:
+        break;
+        exit(1);
+    default:
+        printf("WRONG ENTER");
+        break;
+    }
+    return 0;
+}
